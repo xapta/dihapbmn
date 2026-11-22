@@ -1,7 +1,21 @@
 {
-  "terakhir": "2026-11-22T14:20",
-  "catatan": "Data awal dihimpun dari JDIH Kemenkeu dan JDIH LKPP",
+  "terakhir": "2026-11-22T21:20",
+  "catatan": "2 peraturan baru ditambahkan",
   "riwayat": [
-    { "waktu": "2026-11-22T14:20", "baru": 63, "catatan": "Data awal", "ditambahkan": [] }
+    {
+      "waktu": "2026-11-22T21:20",
+      "baru": 2,
+      "catatan": "2 peraturan baru ditambahkan",
+      "ditambahkan": [
+        "pmk-78-2026",
+        "pmk-72-2026"
+      ]
+    },
+    {
+      "waktu": "2026-11-22T14:20",
+      "baru": 63,
+      "catatan": "Data awal",
+      "ditambahkan": []
+    }
   ]
 }
