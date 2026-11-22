@@ -59,6 +59,7 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .nav a[data-v=penganggaran] .dot{color:#8ea6ff}.nav a[data-v=pengadaan] .dot{color:#ffab6b}.nav a[data-v=bmn] .dot{color:#5fdccd}
 .sidecard{margin-top:auto;background:var(--side2);border-radius:14px;padding:14px;font-size:13px;color:var(--sideMute)}
 .sidecard b{color:#fff;font-weight:600}
+.sidecard .sc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4fd197;margin-right:8px;box-shadow:0 0 0 0 rgba(79,209,151,.6);animation:pulse 2.4s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(79,209,151,0)}100%{box-shadow:0 0 0 0 rgba(79,209,151,0)}}
 
@@ -336,10 +337,10 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
 }
 .topsearch{display:none}
 /* ---------- menu aksesibilitas ---------- */
-.a11y-fab{position:fixed;left:20px;bottom:20px;z-index:45;width:56px;height:56px;border-radius:50%;border:3px solid #fff;background:#1d39c4;color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 24px rgba(29,57,196,.45);transition:transform .15s}
+.a11y-fab{position:fixed;right:20px;bottom:20px;z-index:45;width:56px;height:56px;border-radius:50%;border:3px solid #fff;background:#1d39c4;color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 24px rgba(29,57,196,.45);transition:transform .15s}
 .a11y-fab:hover{transform:scale(1.06)}.a11y-fab svg{width:30px;height:30px;stroke-width:2}
-.a11y-fab .dotx{position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff}
-.a11y{position:fixed;left:0;top:0;bottom:0;width:min(420px,100%);z-index:46;background:var(--bg);box-shadow:var(--shadow2);display:flex;flex-direction:column;transform:translateX(-105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.a11y-fab .dotx{position:absolute;top:-2px;left:-2px;width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+.a11y{position:fixed;right:0;top:0;bottom:0;width:min(420px,100%);z-index:46;background:var(--bg);box-shadow:var(--shadow2);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
 .a11y.on{transform:none}
 .a11y-h{display:flex;align-items:center;gap:10px;padding:16px 18px;background:#1d39c4;color:#fff}
 .a11y-h h2{margin:0;font-size:18px;flex:1}
@@ -380,7 +381,7 @@ html.a-lowsat{filter:saturate(.45)}
 html.a-contrast.a-gray{filter:contrast(1.35) grayscale(1)}
 html.a-contrast.a-lowsat{filter:contrast(1.35) saturate(.45)}
 html.a-speak body [data-speakable]:hover,html.a-speak .content p:hover,html.a-speak .content h1:hover,html.a-speak .content h2:hover,html.a-speak .content h3:hover,html.a-speak .dsec p:hover,html.a-speak .points li:hover{background:rgba(255,212,59,.35);cursor:pointer}
-@media (max-width:900px){.a11y-fab{bottom:84px;left:14px;width:50px;height:50px}}
+@media (max-width:900px){.a11y-fab{bottom:84px;right:14px;width:50px;height:50px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -562,7 +563,7 @@ function renderNav(){
   const b=[['beranda','Beranda','home'],['penganggaran','Anggaran','wallet'],['pengadaan','Pengadaan','cart'],['bmn','BMN','building'],['terbaru','Terbaru','clock']];
   $('#bnav').innerHTML=b.map(([v,l,i])=>`<a href="${H}${v}" ${state.view===v?'aria-current="page"':''}>${ic(i)}${l}</a>`).join('');
   const m=state.meta;
-  $('#sidesync').innerHTML=m?`<div style="display:flex;align-items:center;margin-bottom:6px"><span class="pulse"></span><b>Pemantauan aktif</b></div>Diperiksa ${esc(fmt((m.terakhir||'').slice(0,10)))}${m.terakhir&&m.terakhir.length>10?', '+esc(m.terakhir.slice(11,16))+' WIB':''}<br>${esc(m.catatan||'')}`:'<span class="pulse"></span>Memuat status…';
+  $('#sidesync').innerHTML=m?`<div style="display:flex;align-items:center;margin-bottom:6px"><span class="pulse"></span><b>Pemantauan aktif</b></div>Diperiksa ${esc(fmt((m.terakhir||'').slice(0,10)))}${m.terakhir&&m.terakhir.length>10?', '+esc(m.terakhir.slice(11,16))+' WIB':''}<span class="sc" title="${esc(m.catatan||'')}">${esc((m.catatan||'').replace(/\s*\([^)]*\)/g,''))}</span>`:'<span class="pulse"></span>Memuat status…';
 }
 const terbaru=()=>state.rows.filter(r=>recentAdd(r)||(isNew(r)&&berlaku(r))).sort((a,b)=>(b.ditambahkan||'').localeCompare(a.ditambahkan||'')*(recentAdd(a)||recentAdd(b)?1:0)||dateKey(b).localeCompare(dateKey(a)));
 
