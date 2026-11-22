@@ -1,0 +1,29 @@
+name: Setup admin Firebase
+
+on:
+  workflow_dispatch:
+    inputs:
+      admin_emails:
+        description: "Email admin yang sudah dibuat di Firebase Authentication (pisahkan dengan koma)"
+        required: false
+        default: ""
+      cabut_emails:
+        description: "Email yang dicabut hak adminnya (opsional)"
+        required: false
+        default: ""
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Aktifkan MFA, tandai admin, pasang aturan Firestore
+        run: node scripts/setup-firebase.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          ADMIN_EMAILS: ${{ github.event.inputs.admin_emails }}
+          CABUT_EMAILS: ${{ github.event.inputs.cabut_emails }}
