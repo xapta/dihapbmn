@@ -1,0 +1,11 @@
+{
+  "name": "direktori-peraturan",
+  "private": true,
+  "type": "module",
+  "description": "Direktori peraturan penganggaran, pengadaan, dan BMN dengan pembaruan otomatis dari JDIH",
+  "scripts": {
+    "update": "node scripts/update.mjs",
+    "cek": "DRY_RUN=1 node scripts/update.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

@@ -1,0 +1,3 @@
+Taruh file PDF peraturan di folder ini (lewat panel admin aplikasi atau Add file > Upload files di GitHub).
+Workflow "Tambah peraturan manual" akan membacanya, membuat rangkuman, lalu memindahkannya ke public/dokumen/.
+Opsional: buat file <nama>.pdf.txt berisi link sumber resmi atau catatan.
