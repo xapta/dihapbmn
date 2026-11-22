@@ -248,7 +248,7 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
 .dlg h2{font-size:22px;margin:0;letter-spacing:-.015em}
 .dlg .sub{color:var(--mute);font-size:14px;margin:6px 0 0}
 .dlg label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--ink2);margin:14px 0 0}
-.dlg input[type=text],.dlg input[type=url],.dlg input[type=password],.dlg textarea{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:16px;font-weight:400;min-height:44px}
+.dlg input[type=text],.dlg input[type=url],.dlg input[type=password],.dlg input[type=email],.dlg textarea{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:16px;font-weight:400;min-height:44px}
 .dlg textarea{min-height:96px;resize:vertical}
 .drop{display:grid;place-items:center;gap:6px;text-align:center;border:2px dashed var(--line);border-radius:14px;padding:22px;background:var(--surface2);color:var(--mute);font-weight:500;cursor:pointer;transition:border-color .15s,background .15s}
 .drop:hover,.drop.over{border-color:var(--brand);background:var(--brandSoft)}
@@ -270,7 +270,8 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
 .login .tile{--cc:var(--brand);--cs:var(--brandSoft);width:56px;height:56px;border-radius:16px;margin-bottom:16px}
 .login h1{font-size:26px;letter-spacing:-.02em;margin:0 0 6px}
 .login label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--ink2);margin:16px 0 0}
-.login input[type=text],.login input[type=password]{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:16px;font-weight:400;min-height:46px}
+.login input[type=text],.login input[type=password],.login input[type=email]{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:16px;font-weight:400;min-height:46px}
+.login input:focus,.dlg input:focus,.dlg textarea:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px var(--brandSoft)}
 .login .chk{flex-direction:row;align-items:center;gap:10px;font-weight:500}
 .login .chk input{width:18px;height:18px;accent-color:var(--brand)}
 .login .btn{width:100%;margin-top:20px;min-height:48px}
