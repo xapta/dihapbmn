@@ -266,6 +266,30 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
 .cfg summary::-webkit-details-marker{display:none}
 .cfg summary svg{color:var(--mute)}
 .small{font-size:12.5px;color:var(--mute);margin:10px 0 0}
+.login{max-width:520px;margin:4vh auto 0;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:clamp(22px,4vw,36px);box-shadow:var(--shadow2)}
+.login .tile{--cc:var(--brand);--cs:var(--brandSoft);width:56px;height:56px;border-radius:16px;margin-bottom:16px}
+.login h1{font-size:26px;letter-spacing:-.02em;margin:0 0 6px}
+.login label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--ink2);margin:16px 0 0}
+.login input[type=text],.login input[type=password]{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:16px;font-weight:400;min-height:46px}
+.login .chk{flex-direction:row;align-items:center;gap:10px;font-weight:500}
+.login .chk input{width:18px;height:18px;accent-color:var(--brand)}
+.login .btn{width:100%;margin-top:20px;min-height:48px}
+.adm{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;margin-top:8px}
+.admhead{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:8px 0 20px}
+.admhead .who{display:flex;gap:14px;align-items:center;flex:1}
+.admhead .tile{--cc:var(--brand);--cs:var(--brandSoft);width:56px;height:56px;border-radius:16px}
+.admhead h1{font-size:clamp(24px,3vw,32px);margin:0;letter-spacing:-.02em;font-weight:800}
+.admhead p{margin:2px 0 0;color:var(--mute)}
+.runs{list-style:none;margin:0;padding:0 6px 8px}
+.runs li a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px;border-radius:12px;text-decoration:none;color:inherit;min-height:52px}
+.runs li a:hover{background:var(--surface2)}
+.runs b{font-size:14px;font-weight:600;display:block;color:var(--ink)}.runs span{font-size:12.5px;color:var(--mute)}
+.rs{width:12px;height:12px;border-radius:50%;background:var(--mute)}
+.rs.success{background:var(--ok)}.rs.failure,.rs.cancelled{background:var(--bad)}.rs.run{background:#e8a33d;animation:pulse 1.6s infinite}
+.links{display:grid;gap:4px;padding:0 6px 8px}
+.links a{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;text-decoration:none;color:inherit;font-weight:600;font-size:14px;min-height:46px}
+.links a:hover{background:var(--surface2);color:var(--brand)}
+@media (max-width:1000px){.adm{grid-template-columns:minmax(0,1fr)}}
 
 /* ---------- toast & mobile nav ---------- */
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--surface);padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;display:flex;gap:8px;align-items:center;opacity:0;pointer-events:none;transition:all .25s;z-index:50;box-shadow:var(--shadow2)}
@@ -345,20 +369,23 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 4 3H6l4-3z"/><path d="M12 13v8"/></symbol>
     <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M5 21h14M6 7h12"/><path d="m6 7-3 7a3 3 0 0 0 6 0zM18 7l-3 7a3 3 0 0 0 6 0z"/></symbol>
     <symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="9" r="2"/><path d="M6 8v8M18 11c0 4-6 3-11 6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4"/><path d="M10 17l-5-5 5-5M5 12h11"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
     <symbol id="i-mark" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/><path d="M10 12h6M10 16h4"/><path d="M4 7v14h11"/></symbol>
   </defs>
 </svg>
 
 <div class="app">
   <aside class="side" aria-label="Menu utama">
-    <a class="brand" href="#beranda"><span class="mark"><svg><use href="#i-mark"/></svg></span><span><b>Direktori Regulasi</b><small>Keuangan Negara</small></span></a>
+    <a class="brand" href="/#beranda"><span class="mark"><svg><use href="#i-mark"/></svg></span><span><b>Direktori Regulasi</b><small>Keuangan Negara</small></span></a>
     <nav class="nav" id="nav"></nav>
     <div class="sidecard" id="sidesync"><span class="pulse"></span>Memuat status…</div>
   </aside>
 
   <div class="main">
     <header class="top" id="top">
-      <a class="mbrand" href="#beranda"><span class="mark"><svg><use href="#i-mark"/></svg></span><b>Direktori<br>Regulasi</b></a>
+      <a class="mbrand" href="/#beranda"><span class="mark"><svg><use href="#i-mark"/></svg></span><b>Direktori<br>Regulasi</b></a>
       <button class="searchbtn" id="openPal" aria-label="Cari peraturan"><svg class="i"><use href="#i-search"/></svg><span>Cari nomor, judul, atau isi peraturan…</span><kbd>Ctrl K</kbd></button>
       <div class="topact">
         <button class="iconbtn topsearch" id="openPal2" aria-label="Cari"><svg class="i"><use href="#i-search"/></svg></button>
@@ -409,15 +436,6 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
       <input id="note" type="text" placeholder="mis. fokuskan pada ketentuan uang persediaan"></label>
     <div class="row2"><button class="btn" id="send"><svg class="i"><use href="#i-spark"/></svg>Kirim untuk diproses</button><button class="btn ghost" id="closeAdd">Tutup</button></div>
     <div class="msg" id="msg" aria-live="polite"></div>
-    <details class="cfg" id="cfg">
-      <summary><svg class="i"><use href="#i-gear"/></svg>Pengaturan admin (sekali per perangkat)</summary>
-      <label>Repositori GitHub (pemilik/nama)
-        <input id="repo" type="text" placeholder="namaakun/direktori-peraturan" autocomplete="off"></label>
-      <label>Token GitHub (fine-grained, hanya untuk repositori ini)
-        <input id="tok" type="password" placeholder="github_pat_…" autocomplete="off"></label>
-      <div class="row2"><button class="btn ghost" id="saveCfg"><svg class="i"><use href="#i-check"/></svg>Simpan &amp; uji</button><button class="btn ghost" id="forget">Hapus dari perangkat ini</button></div>
-      <p class="small">Token hanya disimpan di browser perangkat ini dan dipakai langsung ke api.github.com. Jangan simpan di komputer bersama.</p>
-    </details>
   </div>
 </div>
 
@@ -460,6 +478,8 @@ const copy=(t,ok)=>navigator.clipboard.writeText(t).then(()=>toast(ok),()=>toast
 const countUp=()=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.querySelectorAll('[data-count]').forEach(el=>{const to=+el.dataset.count,t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/900);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)})};
 
 /* ---------- navigasi ---------- */
+const IS_ADMIN=/\/admin\/?$/.test(location.pathname);
+const H=IS_ADMIN?'/#':'#';
 const VIEWS=[
   {v:'beranda',label:'Beranda',icon:'home'},
   {v:'semua',label:'Semua peraturan',icon:'layers',f:r=>berlaku(r)},
@@ -470,13 +490,14 @@ const VIEWS=[
   {sep:'Pantauan'},
   {v:'terbaru',label:'Terbaru',icon:'clock'},
   {v:'dicabut',label:'Riwayat dicabut',icon:'archive'},
+  ...(IS_ADMIN?[{sep:'Pengelola'},{v:'admin',label:'Panel admin',icon:'lock',href:'/admin'}]:[]),
 ];
 const viewDef=v=>VIEWS.find(x=>x.v===v)||VIEWS[0];
 const navCount=x=>{if(!state.loaded)return '';if(x.cat)return state.rows.filter(r=>r.kategori===x.cat&&berlaku(r)).length;if(x.v==='semua')return state.rows.filter(berlaku).length;if(x.v==='terbaru')return terbaru().length;if(x.v==='dicabut')return state.rows.filter(r=>!berlaku(r)).length;return ''};
 function renderNav(){
-  $('#nav').innerHTML=VIEWS.map(x=>x.sep?`<div class="navlbl">${x.sep}</div>`:`<a href="#${x.v}" data-v="${x.v}" ${state.view===x.v?'aria-current="page"':''}><span class="dot">${ic(x.icon)}</span>${x.label}${navCount(x)!==''?`<span class="cnt">${navCount(x)}</span>`:''}</a>`).join('');
+  $('#nav').innerHTML=VIEWS.map(x=>x.sep?`<div class="navlbl">${x.sep}</div>`:`<a href="${x.href||H+x.v}" data-v="${x.v}" ${state.view===x.v?'aria-current="page"':''}><span class="dot">${ic(x.icon)}</span>${x.label}${navCount(x)!==''?`<span class="cnt">${navCount(x)}</span>`:''}</a>`).join('');
   const b=[['beranda','Beranda','home'],['penganggaran','Anggaran','wallet'],['pengadaan','Pengadaan','cart'],['bmn','BMN','building'],['terbaru','Terbaru','clock']];
-  $('#bnav').innerHTML=b.map(([v,l,i])=>`<a href="#${v}" ${state.view===v?'aria-current="page"':''}>${ic(i)}${l}</a>`).join('');
+  $('#bnav').innerHTML=b.map(([v,l,i])=>`<a href="${H}${v}" ${state.view===v?'aria-current="page"':''}>${ic(i)}${l}</a>`).join('');
   const m=state.meta;
   $('#sidesync').innerHTML=m?`<div style="display:flex;align-items:center;margin-bottom:6px"><span class="pulse"></span><b>Pemantauan aktif</b></div>Diperiksa ${esc(fmt((m.terakhir||'').slice(0,10)))}${m.terakhir&&m.terakhir.length>10?', '+esc(m.terakhir.slice(11,16))+' WIB':''}<br>${esc(m.catatan||'')}`:'<span class="pulse"></span>Memuat status…';
 }
@@ -585,7 +606,7 @@ function openDrawer(id){
 function closeDrawer(){
   if(!state.open)return;const last=state.open;state.open=null;
   const d=$('#drawer');d.classList.remove('on');d.setAttribute('aria-hidden','true');$('#scrim').classList.remove('on');document.body.style.overflow='';
-  history.replaceState(null,'','#'+state.view);
+  history.replaceState(null,'',IS_ADMIN?'/admin':'#'+state.view);
   document.querySelector(`[data-open="${CSS.escape(last)}"]`)?.focus();
 }
 $('#scrim').onclick=closeDrawer;
@@ -617,7 +638,8 @@ $('#openPal').onclick=()=>openPal();$('#openPal2').onclick=()=>openPal();
 /* ---------- router ---------- */
 function route(force){
   const h=location.hash.slice(1)||'beranda';
-  if(h==='admin'){showAdmin();openAdmin();return}
+  if(IS_ADMIN){state.view='admin';if(h.startsWith('p-')&&state.loaded)openDrawer(h.slice(2));render();return}
+  if(h==='admin'){location.replace('/admin');return}
   if(h.startsWith('p-')){if(state.loaded)openDrawer(h.slice(2));else state.pending=h.slice(2);if(!force&&$('#view').innerHTML)return}
   else{if(state.open)closeDrawer();const nv=VIEWS.some(x=>x.v===h)?h:'beranda';if(nv!==state.view){state.view=nv;state.jenis='';state.limit=24;state.q='';window.scrollTo({top:0})}}
   render();
@@ -626,6 +648,7 @@ function goSearch(q){if(state.open)closeDrawer();state.q=q;state.view='semua';st
 function render(){
   renderNav();
   const v=$('#view');
+  if(state.view==='admin'){v.innerHTML=renderAdmin();bindAdmin();return}
   if(state.view==='beranda'){v.innerHTML=state.loaded?renderHome():`<div class="skel" style="height:320px;border-radius:24px"></div><div class="cats" style="margin-top:32px">${'<div class="skel"></div>'.repeat(3)}</div>`;if(state.loaded)countUp()}
   else{v.innerHTML=renderList();renderResults()}
 }
@@ -656,29 +679,83 @@ document.addEventListener('keydown',e=>{
 /* ---------- muat data ---------- */
 const load=async()=>{
   try{
-    const [p,m]=await Promise.all([fetch('data/peraturan.json',{cache:'no-cache'}),fetch('data/meta.json',{cache:'no-cache'})]);
+    const [p,m]=await Promise.all([fetch('/data/peraturan.json',{cache:'no-cache'}),fetch('/data/meta.json',{cache:'no-cache'})]);
     if(!p.ok)throw new Error(p.status);
     state.rows=await p.json();state.meta=m.ok?await m.json():null;
   }catch(_){toast('Direktori gagal dimuat. Periksa koneksi.')}
   const first=!state.loaded;state.loaded=true;
   if(first){render();if(state.pending){openDrawer(state.pending);state.pending=null}}
-  else{renderNav();if(state.view==='beranda'){$('#view').innerHTML=renderHome()}else renderResults()}
+  else{renderNav();if(state.view==='admin'){if(!$('#ov').hidden||document.activeElement?.closest('.login'))return;render()}else if(state.view==='beranda'){$('#view').innerHTML=renderHome()}else renderResults()}
 };
-route(true);load();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&state.loaded)load()});
 
 /* ---------- panel admin: tambah peraturan lewat GitHub API ---------- */
-const cfg=()=>({repo:LS.get('dp_repo'),tok:LS.get('dp_tok')});
-function showAdmin(){$('#openAdd').hidden=!(location.hash==='#admin'||cfg().tok)}
+const DEFAULT_REPO='xapta/dihapbmn'; // ganti bila nama repositori berubah
+const SS={get:k=>{try{return sessionStorage.getItem(k)||''}catch(_){return ''}},set:(k,v)=>{try{v?sessionStorage.setItem(k,v):sessionStorage.removeItem(k)}catch(_){}}};
+const cfg=()=>({repo:SS.get('dp_repo')||LS.get('dp_repo')||DEFAULT_REPO,tok:SS.get('dp_tok')||LS.get('dp_tok'),user:SS.get('dp_user')||LS.get('dp_user')});
+const loggedIn=()=>!!cfg().tok;
+function showAdmin(){$('#openAdd').hidden=true} // tombol tambah hanya di Panel admin
 showAdmin();
+function logout(){['dp_tok','dp_user','dp_repo'].forEach(k=>{LS.set(k,'');SS.set(k,'')});showAdmin();render();toast('Anda sudah keluar')}
+function renderAdmin(){
+  const c=cfg();
+  if(!loggedIn())return `<div class="login fade"><span class="tile">${ic('lock')}</span><h1>Masuk admin</h1><p class="sub" style="color:var(--mute);margin:0">Khusus pengelola direktori, untuk menambah peraturan dari link atau PDF.</p>
+    <form id="loginForm"><label>Repositori GitHub<input id="lrepo" type="text" value="${esc(c.repo)}" autocomplete="off"></label>
+    <label>Token akses GitHub<input id="ltok" type="password" placeholder="github_pat_…" autocomplete="current-password" required></label>
+    <label class="chk"><input id="lrem" type="checkbox">Ingat saya di perangkat ini</label>
+    <button class="btn" id="lbtn" type="submit">${ic('lock')}Masuk</button></form>
+    <div class="msg" id="lmsg" aria-live="polite"></div>
+    <p class="small">Token dibuat di GitHub → Settings → Developer settings → Fine-grained tokens, khusus repositori ini, dengan izin Contents dan Actions: Read and write. Tanpa "Ingat saya", Anda otomatis keluar saat browser ditutup.</p></div>`;
+  const man=state.rows.filter(r=>r.manual).sort((a,b)=>(b.ditambahkan||'').localeCompare(a.ditambahkan||'')).slice(0,6);
+  return `<div class="admhead fade"><div class="who"><span class="tile">${ic('user')}</span><div><h1>Panel admin</h1><p>Masuk sebagai <b>${esc(c.user||'admin')}</b> · ${esc(c.repo)}</p></div></div>
+    <button class="btn" id="admAdd">${ic('plus')}Tambah peraturan</button><button class="btn ghost" id="admOut">${ic('logout')}Keluar</button></div>
+  <div class="adm fade">
+    <div class="panel"><div class="ph">${ic('refresh')}Proses terakhir<a class="more" style="margin-left:auto" href="https://github.com/${esc(c.repo)}/actions" target="_blank" rel="noopener">GitHub Actions${ic('ext')}</a></div><ul class="runs" id="runs"><li style="padding:12px;color:var(--mute)">Memuat…</li></ul></div>
+    <div style="display:grid;gap:16px;align-content:start">
+      <div class="panel"><div class="ph">${ic('upload')}Ditambahkan manual</div><ul class="feed">${man.map(r=>`<li><button data-open="${esc(r.id)}"><span class="mini k-${kOf(r)}">${ic(CAT[r.kategori]?.icon||'file')}</span><span><span class="ft">${esc(ref(r))}</span><span class="fs">${esc(r.judul)}</span></span><span class="fd">${esc(fmt(r.ditambahkan))}</span></button></li>`).join('')||'<li style="padding:12px 14px;color:var(--mute)">Belum ada.</li>'}</ul></div>
+      <div class="panel"><div class="ph">${ic('link')}Pintasan</div><div class="links">
+        <a href="https://github.com/${esc(c.repo)}/actions/workflows/update.yml" target="_blank" rel="noopener">${ic('refresh')}Jalankan pengecekan JDIH sekarang</a>
+        <a href="https://github.com/${esc(c.repo)}/blob/main/public/data/peraturan.json" target="_blank" rel="noopener">${ic('file')}Edit data peraturan</a>
+        <a href="/#beranda">${ic('home')}Lihat halaman publik</a></div></div>
+    </div></div>`;
+}
+const RUNNAME={'update.yml':'Pantau peraturan JDIH','tambah-manual.yml':'Tambah peraturan manual','deploy.yml':'Deploy'};
+async function loadRuns(){
+  const el=$('#runs');if(!el)return;
+  try{const j=await gh('/actions/runs?per_page=8');
+    el.innerHTML=(j.workflow_runs||[]).map(r=>{const st=r.status!=='completed'?'run':(r.conclusion||'');const w=(r.path||'').split('/').pop();
+      return `<li><a href="${esc(r.html_url)}" target="_blank" rel="noopener"><span class="rs ${esc(st)}"></span><span><b>${esc(RUNNAME[w]||r.name)}</b><span>${esc(st==='run'?'Sedang berjalan':st==='success'?'Berhasil':st==='failure'?'Gagal':st)} · ${esc(new Date(r.created_at).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}))}</span></span>${ic('ext')}</a></li>`}).join('')||'<li style="padding:12px;color:var(--mute)">Belum ada proses.</li>';
+  }catch(e){el.innerHTML=`<li style="padding:12px;color:var(--bad)">Gagal memuat: ${esc(e.message)}</li>`;if(/401/.test(e.message))logout()}
+}
+let runsTimer=null;
+function bindAdmin(){
+  showAdmin();clearInterval(runsTimer);
+  const f=$('#loginForm');
+  if(f){f.addEventListener('submit',async e=>{e.preventDefault();
+    const repo=$('#lrepo').value.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/$/,''),tok=$('#ltok').value.trim(),rem=$('#lrem').checked,m=$('#lmsg');
+    if(!/^[\w.-]+\/[\w.-]+$/.test(repo)||!tok){m.className='msg err';m.textContent='Isi repositori dan token.';return}
+    $('#lbtn').disabled=true;m.className='msg';m.textContent='Memeriksa akses…';
+    try{
+      const H2={Accept:'application/vnd.github+json',Authorization:'Bearer '+tok,'X-GitHub-Api-Version':'2022-11-28'};
+      const r=await fetch('https://api.github.com/repos/'+repo,{headers:H2});
+      if(!r.ok)throw new Error(r.status===401?'Token tidak valid atau kedaluwarsa':r.status===404?'Repositori tidak ditemukan atau token tidak diberi akses ke repositori ini':'GitHub '+r.status);
+      const j=await r.json();if(!j.permissions?.push)throw new Error('Token tidak punya izin tulis (Contents: Read and write)');
+      let user='';try{const u=await fetch('https://api.github.com/user',{headers:H2});if(u.ok)user=(await u.json()).login||''}catch(_){}
+      const S=rem?LS:SS;S.set('dp_repo',j.full_name);S.set('dp_tok',tok);S.set('dp_user',user);
+      toast('Berhasil masuk');render();
+    }catch(err){m.className='msg err';m.textContent=err.message}finally{const b=$('#lbtn');if(b)b.disabled=false}
+  });setTimeout(()=>$('#ltok')?.focus(),50);return}
+  $('#admAdd').onclick=openAdmin;$('#admOut').onclick=logout;
+  loadRuns();runsTimer=setInterval(loadRuns,30000);
+}
 let mode='link';
 const msg=(t,k='')=>{const m=$('#msg');m.className='msg '+k;m.innerHTML=t};
 const gh=async(path,opt={})=>{const {repo,tok}=cfg();const r=await fetch(`https://api.github.com/repos/${repo}${path}`,{...opt,headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+tok,'X-GitHub-Api-Version':'2022-11-28',...(opt.body?{'Content-Type':'application/json'}:{})}});if(!r.ok){let d='';try{d=(await r.json()).message}catch(_){}throw new Error(`GitHub ${r.status}${d?': '+d:''}`)}return r.status===204?null:r.json()};
 const actionsLink=()=>`<a href="https://github.com/${esc(cfg().repo)}/actions/workflows/tambah-manual.yml" target="_blank" rel="noopener">lihat prosesnya di GitHub Actions</a>`;
 const setMode=m=>{mode=m;$('#mLink').setAttribute('aria-pressed',m==='link');$('#mFile').setAttribute('aria-pressed',m==='file');$('#fLink').hidden=m!=='link';$('#fFile').hidden=m!=='file'};
 $('#mLink').onclick=()=>setMode('link');$('#mFile').onclick=()=>setMode('file');
-function openAdmin(){const c=cfg();$('#repo').value=c.repo;$('#tok').value=c.tok;$('#cfg').open=!c.tok||!c.repo;msg('');$('#ov').hidden=false;setTimeout(()=>(c.tok?$('#links'):$('#repo')).focus(),30)}
-function closeAdmin(){$('#ov').hidden=true;if(location.hash==='#admin')history.replaceState(null,'','#'+state.view);$('#openAdd').focus()}
+function openAdmin(){if(!IS_ADMIN||!loggedIn())return;msg('');$('#ov').hidden=false;setTimeout(()=>$('#links').focus(),30)}
+function closeAdmin(){$('#ov').hidden=true;$('#openAdd').focus()}
 $('#openAdd').onclick=openAdmin;$('#closeAdd').onclick=closeAdmin;
 $('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeAdmin()});
 ['fLink','fFile'].forEach(id=>$('#'+id).addEventListener('submit',e=>e.preventDefault()));
@@ -688,21 +765,13 @@ const drop=$('#drop');
 ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
 ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
 drop.addEventListener('drop',e=>{const dt=new DataTransfer();[...e.dataTransfer.files].filter(f=>/pdf$/i.test(f.name)||f.type==='application/pdf').forEach(f=>dt.items.add(f));$('#pdfs').files=dt.files;updDrop()});
-$('#saveCfg').onclick=async()=>{
-  const repo=$('#repo').value.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/$/,''),tok=$('#tok').value.trim();
-  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)||!tok){msg('Isi repositori (pemilik/nama) dan token terlebih dahulu.','err');return}
-  LS.set('dp_repo',repo);LS.set('dp_tok',tok);msg('Menguji akses…');
-  try{const r=await gh('');if(!r.permissions?.push)throw new Error('token tidak punya izin tulis ke repositori ini');msg(`Tersambung ke <b>${esc(r.full_name)}</b>. Pengaturan tersimpan di perangkat ini.`,'ok');$('#cfg').open=false;showAdmin()}
-  catch(e){msg('Gagal: '+esc(e.message)+'. Periksa nama repositori dan izin token (Contents & Actions: Read and write).','err')}
-};
-$('#forget').onclick=()=>{LS.set('dp_repo','');LS.set('dp_tok','');$('#repo').value='';$('#tok').value='';msg('Token dihapus dari perangkat ini.','ok')};
 const b64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=()=>no(r.error);r.readAsDataURL(f)});
 const b64txt=s=>btoa(unescape(encodeURIComponent(s)));
 const safe=n=>n.normalize('NFKD').replace(/[^\w.-]+/g,'-').replace(/-+/g,'-').slice(-80);
 let watchTimer=null;
 const watch=before=>{clearInterval(watchTimer);let n=0;watchTimer=setInterval(async()=>{n++;await load();const baru=state.rows.filter(r=>!before.has(r.id+'|'+(r.ringkasan||'')));if(baru.length){clearInterval(watchTimer);msg('Sudah masuk ke direktori: '+baru.map(r=>`<b>${esc(ref(r))}</b>`).join(', ')+'.','ok');toast('Peraturan baru sudah masuk')}else if(n>=20){clearInterval(watchTimer);msg('Belum terlihat setelah 10 menit. Periksa '+actionsLink()+'.','err')}},30000)};
 $('#send').onclick=async()=>{
-  const c=cfg();if(!c.tok||!c.repo){$('#cfg').open=true;msg('Isi pengaturan admin terlebih dahulu.','err');return}
+  if(!IS_ADMIN||!loggedIn()){msg('Sesi admin berakhir. Silakan masuk lagi.','err');return}
   const note=$('#note').value.trim(),btn=$('#send');
   const before=new Set(state.rows.map(r=>r.id+'|'+(r.ringkasan||'')));
   btn.disabled=true;
@@ -727,10 +796,13 @@ $('#send').onclick=async()=>{
       $('#pdfs').value='';updDrop();
     }
     msg('Terkirim. Gemini sedang membaca dan merangkum; biasanya 2–5 menit. Halaman ini memeriksa otomatis setiap 30 detik, atau '+actionsLink()+'.','ok');
-    watch(before);
+    watch(before);setTimeout(loadRuns,4000);
   }catch(e){msg('Gagal: '+esc(e.message),'err')}
   finally{btn.disabled=false}
 };
+
+/* ---------- mulai ---------- */
+route(true);load();
 }
 </script>
 </body>
