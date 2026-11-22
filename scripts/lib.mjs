@@ -6,7 +6,12 @@ export const META = 'public/data/meta.json';
 export const SEEN = 'scripts/state/seen.json';
 export const KEY = process.env.GEMINI_API_KEY;
 export const MODEL = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
-const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; DirektoriPeraturanBot/1.0)' };
+// Header ala browser: beberapa server JDIH memutus koneksi dari klien yang tampak seperti bot.
+const UA = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36 DirektoriPeraturan/1.1',
+  'Accept': 'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'id-ID,id;q=0.9,en;q=0.7',
+};
 const API = 'https://generativelanguage.googleapis.com';
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -14,18 +19,23 @@ export const today = () => new Date(Date.now() + 7 * 36e5).toISOString().slice(0
 export const nowWIB = () => new Date(Date.now() + 7 * 36e5).toISOString().slice(0, 16);
 export const log = (...a) => console.log('[jdih]', ...a);
 
-export async function fetchRaw(url, tries = 2) {
+export async function fetchRaw(url, tries = 3) {
   for (let i = 0; i < tries; i++) {
     try {
-      const r = await fetch(url, { headers: UA, redirect: 'follow', signal: AbortSignal.timeout(60000) });
+      const r = await fetch(url, { headers: UA, redirect: 'follow', signal: AbortSignal.timeout(45000) });
       if (r.ok) return r;
       log('HTTP', r.status, url);
-    } catch (e) { log('gagal', url, e.message); }
-    await sleep(4000);
+      if (r.status === 404) return null;
+    } catch (e) {
+      // "fetch failed" saja tidak informatif; tampilkan penyebab aslinya (timeout, koneksi diputus, sertifikat, dst.)
+      const c = e.cause || {};
+      log('gagal', url, `(${c.code || e.name}${c.message ? ': ' + c.message : ''}) percobaan ${i + 1}/${tries}`);
+    }
+    if (i < tries - 1) await sleep(5000 * (i + 1) ** 2); // 5 dtk, 20 dtk
   }
   return null;
 }
-export async function get(url, tries = 2) { const r = await fetchRaw(url, tries); return r ? r.text() : null; }
+export async function get(url, tries = 3) { const r = await fetchRaw(url, tries); return r ? r.text() : null; }
 
 export const strip = html => html
   .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<nav[\s\S]*?<\/nav>|<footer[\s\S]*?<\/footer>/gi, ' ')
@@ -64,23 +74,58 @@ export async function pdfPart(buf, name = 'peraturan.pdf') {
   return { file_data: { mime_type: 'application/pdf', file_uri: file.uri } };
 }
 
+// Model cadangan: diambil otomatis dari daftar model yang tersedia untuk API key ini
+// (keluarga Flash/Flash-Lite), dipakai bila model utama sibuk (503), kena batas (429), atau sudah dihentikan (404).
+let fallbackCache = null;
+async function fallbackModels() {
+  if (fallbackCache) return fallbackCache;
+  const extra = (process.env.GEMINI_FALLBACK || '').split(/[\s,]+/).filter(Boolean);
+  let listed = [];
+  try {
+    const r = await fetch(`${API}/v1beta/models?pageSize=200`, { headers: { 'x-goog-api-key': KEY } });
+    if (r.ok) listed = ((await r.json()).models || [])
+      .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map(m => m.name.replace(/^models\//, ''))
+      .filter(n => /flash/i.test(n) && !/(image|tts|audio|live|embedding|preview-\d{2}-\d{2}|exp)/i.test(n))
+      .sort((a, b) => (/lite/.test(b) - /lite/.test(a)) || b.localeCompare(a, 'en', { numeric: true }));
+  } catch { /* abaikan: tetap pakai daftar manual */ }
+  fallbackCache = [...new Set([...extra, ...listed])].filter(n => n !== MODEL).slice(0, 4);
+  log('model cadangan:', fallbackCache.join(', ') || '(tidak ada)');
+  return fallbackCache;
+}
+
+async function callModel(model, parts) {
+  const r = await fetch(`${API}/v1beta/models/${model}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': KEY },
+    body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }),
+    signal: AbortSignal.timeout(180000),
+  }).catch(e => ({ ok: false, status: 0, text: async () => e.message }));
+  if (r.ok) {
+    const j = await r.json();
+    const t = j.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+    try { return { ok: true, data: JSON.parse(t.replace(/^```json\s*|```$/g, '')) }; } catch { return { ok: false, status: 'json' }; }
+  }
+  const body = (await r.text()).replace(/\s+/g, ' ').slice(0, 160);
+  log(`Gemini ${model} HTTP ${r.status}: ${body}`);
+  return { ok: false, status: r.status };
+}
+
 export async function askGemini(parts) {
-  const url = `${API}/v1beta/models/${MODEL}:generateContent`;
-  for (let i = 0; i < 3; i++) {
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': KEY },
-      body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }),
-      signal: AbortSignal.timeout(180000),
-    }).catch(e => ({ ok: false, status: 0, text: async () => e.message }));
-    if (r.ok) {
-      const j = await r.json();
-      const t = j.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
-      try { return JSON.parse(t.replace(/^```json\s*|```$/g, '')); } catch { log('JSON Gemini tidak valid'); return null; }
-    }
-    log('Gemini HTTP', r.status, (await r.text()).slice(0, 300));
-    if (r.status === 429 || r.status >= 500) { await sleep(30000 * (i + 1)); continue; }
-    return null;
+  // 1) model utama, maks. 2 kali (jeda 20 dtk)
+  for (let i = 0; i < 2; i++) {
+    const res = await callModel(MODEL, parts);
+    if (res.ok) return res.data;
+    if (res.status === 'json') { log('JSON Gemini tidak valid, coba sekali lagi'); continue; }
+    if (![0, 429, 500, 502, 503, 504, 404].includes(res.status)) return null; // 400/403: kunci/permintaan salah
+    if (res.status === 404) break;
+    await sleep(20000);
+  }
+  // 2) model cadangan, masing-masing sekali
+  for (const m of await fallbackModels()) {
+    const res = await callModel(m, parts);
+    if (res.ok) { log('berhasil dengan model cadangan', m); return res.data; }
+    await sleep(5000);
   }
   return null;
 }

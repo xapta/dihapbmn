@@ -28,7 +28,7 @@ async function lkppCandidates() {
       const url = m[0].startsWith('http') ? m[0] : 'https://jdih.lkpp.go.id' + m[0];
       if (!found.has(url)) found.set(url, { url, title: url.split('/').pop().replace(/-/g, ' '), hint: '', sumber: 'JDIH LKPP' });
     }
-    await sleep(1500);
+    await sleep(4000); // jeda antarhalaman agar server LKPP tidak memutus koneksi
   }
   return { ok: okAny, items: [...found.values()] };
 }
