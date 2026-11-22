@@ -1,0 +1,52 @@
+name: Pantau peraturan JDIH
+
+on:
+  schedule:
+    - cron: "38 23 * * *"   # setiap hari 06:38 WIB (23:38 UTC)
+  workflow_dispatch:         # bisa dijalankan manual dari tab Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pantau-peraturan
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cek JDIH, saring, dan rangkum dengan Gemini
+        id: upd
+        run: node scripts/update.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+
+      - name: Simpan hasil ke repositori
+        run: |
+          git config user.name "pantau-jdih[bot]"
+          git config user.email "pantau-jdih@users.noreply.github.com"
+          git add public/data scripts/state
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan."
+          else
+            git commit -m "Pembaruan JDIH: ${{ steps.upd.outputs.summary }}"
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Deploy ke Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ vars.FIREBASE_PROJECT_ID }}
+          channelId: live
