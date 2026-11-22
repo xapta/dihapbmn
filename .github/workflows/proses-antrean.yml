@@ -1,0 +1,79 @@
+name: Proses antrean admin
+
+# Memeriksa permintaan dari Panel admin (disimpan di Firestore) setiap 5 menit.
+# Catatan: jadwal GitHub Actions bisa terlambat beberapa menit saat server GitHub ramai.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pantau-peraturan
+  cancel-in-progress: false
+
+jobs:
+  proses:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ambil permintaan dari Firestore
+        id: ambil
+        run: node scripts/antrean.mjs ambil
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+
+      - name: Baca, ekstrak metadata, dan rangkum dengan Gemini
+        id: run
+        if: steps.ambil.outputs.ada == 'true'
+        continue-on-error: true
+        run: node scripts/manual.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          MANUAL_URL: ${{ steps.ambil.outputs.urls }}
+          MANUAL_NOTE: ${{ steps.ambil.outputs.catatan }}
+
+      - name: Simpan hasil ke repositori
+        if: steps.ambil.outputs.ada == 'true'
+        run: |
+          git config user.name "pantau-jdih[bot]"
+          git config user.email "pantau-jdih@users.noreply.github.com"
+          git add -A public/data public/dokumen scripts/state inbox
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan."
+          else
+            git commit -m "Tambah via panel admin: ${{ steps.run.outputs.summary }}"
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Tandai hasil di Firestore
+        if: steps.ambil.outputs.ada == 'true'
+        run: node scripts/antrean.mjs selesai
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          RESULT_SUMMARY: ${{ steps.run.outputs.summary }}
+          RESULT_FAILED: ${{ steps.run.outputs.failed }}
+          RUN_OUTCOME: ${{ steps.run.outcome }}
+
+      - name: Deploy ke Firebase Hosting
+        if: steps.ambil.outputs.ada == 'true' && steps.run.outputs.added != '0' && steps.run.outputs.added != ''
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ vars.FIREBASE_PROJECT_ID }}
+          channelId: live
