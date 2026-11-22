@@ -1,7 +1,15 @@
 {
-  "terakhir": "2026-11-22T21:47",
-  "catatan": "Tambah manual: 1 berhasil",
+  "terakhir": "2026-11-22T21:53",
+  "catatan": "Tambah manual: 1 berhasil, 2 gagal (20261122144656-2-KMK-334-2021-dan-Lampiran-I-KMK-pengelolaan-BMN.pdf, 20261122144656-3-Lampiran-II-KMK-334-2021-1-.pdf)",
   "riwayat": [
+    {
+      "waktu": "2026-11-22T21:53",
+      "baru": 1,
+      "catatan": "Tambah manual: 1 berhasil, 2 gagal (20261122144656-2-KMK-334-2021-dan-Lampiran-I-KMK-pengelolaan-BMN.pdf, 20261122144656-3-Lampiran-II-KMK-334-2021-1-.pdf)",
+      "ditambahkan": [
+        "pmk-334-2021"
+      ]
+    },
     {
       "waktu": "2026-11-22T21:47",
       "baru": 1,
