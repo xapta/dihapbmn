@@ -1,7 +1,15 @@
 {
-  "terakhir": "2026-11-22T21:36",
-  "catatan": "Tidak ada peraturan baru yang relevan",
+  "terakhir": "2026-11-22T21:47",
+  "catatan": "Tambah manual: 1 berhasil",
   "riwayat": [
+    {
+      "waktu": "2026-11-22T21:47",
+      "baru": 1,
+      "catatan": "Tambah manual: 1 berhasil",
+      "ditambahkan": [
+        "lainnya-0-2026"
+      ]
+    },
     {
       "waktu": "2026-11-22T21:36",
       "baru": 0,
