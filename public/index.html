@@ -689,74 +689,126 @@ const load=async()=>{
 };
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&state.loaded)load()});
 
-/* ---------- panel admin: tambah peraturan lewat GitHub API ---------- */
-const DEFAULT_REPO='xapta/dihapbmn'; // ganti bila nama repositori berubah
-const SS={get:k=>{try{return sessionStorage.getItem(k)||''}catch(_){return ''}},set:(k,v)=>{try{v?sessionStorage.setItem(k,v):sessionStorage.removeItem(k)}catch(_){}}};
-const cfg=()=>({repo:SS.get('dp_repo')||LS.get('dp_repo')||DEFAULT_REPO,tok:SS.get('dp_tok')||LS.get('dp_tok'),user:SS.get('dp_user')||LS.get('dp_user')});
-const loggedIn=()=>!!cfg().tok;
+/* ---------- panel admin: Firebase Authentication (email + password + MFA Authenticator) + antrean Firestore ---------- */
+const FBV='10.14.1';
+let FB=null,auth=null,db=null,adm={st:'loading',msg:'',user:null,resolver:null,secret:null,qr:''},unsubQ=null,queue=[];
 function showAdmin(){$('#openAdd').hidden=true} // tombol tambah hanya di Panel admin
 showAdmin();
-function logout(){['dp_tok','dp_user','dp_repo'].forEach(k=>{LS.set(k,'');SS.set(k,'')});showAdmin();render();toast('Anda sudah keluar')}
+const loggedIn=()=>adm.st==='panel';
+const setAdm=o=>{Object.assign(adm,o);if(state.view==='admin')render()};
+const ERR={'auth/invalid-credential':'Email atau password salah.','auth/wrong-password':'Email atau password salah.','auth/user-not-found':'Email atau password salah.','auth/invalid-email':'Format email tidak valid.','auth/too-many-requests':'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.','auth/invalid-verification-code':'Kode MFA salah atau kedaluwarsa.','auth/user-disabled':'Akun ini dinonaktifkan.','auth/requires-recent-login':'Silakan masuk ulang lalu coba lagi.','auth/network-request-failed':'Tidak ada koneksi ke Firebase.','auth/unverified-email':'Email belum diverifikasi. Jalankan workflow "Setup admin Firebase" untuk email ini.','auth/operation-not-allowed':'Fitur belum aktif di Firebase (cek metode Email/Password dan upgrade Identity Platform).'};
+const errMsg=e=>ERR[e?.code]||e?.message||String(e);
+async function initFirebase(){
+  if(FB)return true;
+  let cfg=null;try{cfg=(await (await fetch('/data/config.json',{cache:'no-cache'})).json()).firebase}catch(_){}
+  if(!cfg||!cfg.apiKey){setAdm({st:'error',msg:'Konfigurasi Firebase belum diisi di data/config.json (lihat panduan Langkah 8).'});return false}
+  try{
+    const [A,U,F]=await Promise.all([import(`https://www.gstatic.com/firebasejs/${FBV}/firebase-app.js`),import(`https://www.gstatic.com/firebasejs/${FBV}/firebase-auth.js`),import(`https://www.gstatic.com/firebasejs/${FBV}/firebase-firestore.js`)]);
+    FB={...A,...U,...F};const app=FB.initializeApp(cfg);auth=FB.getAuth(app);auth.languageCode='id';db=FB.getFirestore(app);
+    FB.onAuthStateChanged(auth,u=>checkUser(u));return true;
+  }catch(e){setAdm({st:'error',msg:'Gagal memuat Firebase: '+e.message});return false}
+}
+async function checkUser(u){
+  if(unsubQ){unsubQ();unsubQ=null}
+  if(!u){if(!['mfa','enroll'].includes(adm.st))setAdm({st:'login',user:null});return}
+  const t=await u.getIdTokenResult(true);
+  if(t.claims.admin!==true){await FB.signOut(auth);setAdm({st:'login',msg:'Akun ini belum terdaftar sebagai admin. Jalankan workflow "Setup admin Firebase" untuk email ini.'});return}
+  if(t.claims.firebase?.sign_in_second_factor!=='totp'){
+    if(FB.multiFactor(u).enrolledFactors.length){await FB.signOut(auth);setAdm({st:'login',msg:'Silakan masuk ulang dengan kode MFA.'});return}
+    startEnroll(u);return}
+  setAdm({st:'panel',user:u,msg:''});
+  unsubQ=FB.onSnapshot(FB.query(FB.collection(db,'antrean'),FB.orderBy('dibuat','desc'),FB.limit(12)),s=>{queue=s.docs.map(d=>({id:d.id,...d.data()}));renderQueue()},e=>{const el=$('#queue');if(el)el.innerHTML=`<li style="padding:12px;color:var(--bad)">Gagal memuat antrean: ${esc(e.code||e.message)}</li>`});
+}
+async function startEnroll(u){
+  setAdm({st:'enroll',user:u,secret:null,qr:'',msg:'Menyiapkan kode MFA…'});
+  try{
+    const session=await FB.multiFactor(u).getSession();
+    const secret=await FB.TotpMultiFactorGenerator.generateSecret(session);
+    const uri=secret.generateQrCodeUrl(u.email,'Direktori Regulasi');
+    let qr='';try{if(!window.qrcode)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});const q=qrcode(0,'M');q.addData(uri);q.make();qr=q.createDataURL(6,8)}catch(_){}
+    setAdm({secret,qr,msg:''});
+  }catch(e){setAdm({st:'login',msg:errMsg(e)});FB.signOut(auth)}
+}
+const STLBL={menunggu:['Menunggu giliran','run'],diproses:['Sedang diproses','run'],selesai:['Selesai','success'],gagal:['Gagal','failure']};
+function renderQueue(){
+  const el=$('#queue');if(!el)return;
+  el.innerHTML=queue.map(q=>{const [l,c]=STLBL[q.status]||[q.status,''];const t=q.dibuat?.toDate?q.dibuat.toDate():null;
+    return `<li><a><span class="rs ${c}"></span><span><b>${esc(q.jenis==='pdf'?(q.nama||'PDF'):(q.urls||'').split(' ')[0].replace(/^https?:\/\//,'').slice(0,60))}</b><span>${esc(l)}${q.pesan?' · '+esc(q.pesan):''}${t?' · '+esc(t.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})):''} · ${esc(q.oleh||'')}</span></span></a></li>`}).join('')||'<li style="padding:12px;color:var(--mute)">Belum ada permintaan.</li>';
+}
 function renderAdmin(){
-  const c=cfg();
-  if(!loggedIn())return `<div class="login fade"><span class="tile">${ic('lock')}</span><h1>Masuk admin</h1><p class="sub" style="color:var(--mute);margin:0">Khusus pengelola direktori, untuk menambah peraturan dari link atau PDF.</p>
-    <form id="loginForm"><label>Repositori GitHub<input id="lrepo" type="text" value="${esc(c.repo)}" autocomplete="off"></label>
-    <label>Token akses GitHub<input id="ltok" type="password" placeholder="github_pat_…" autocomplete="current-password" required></label>
+  const m=adm.msg?`<div class="msg ${adm.st==='error'||/salah|belum|gagal|terlalu|tidak/i.test(adm.msg)?'err':''}" id="lmsg">${esc(adm.msg)}</div>`:'<div class="msg" id="lmsg"></div>';
+  const card=(icon,title,sub,body)=>`<div class="login fade"><span class="tile">${ic(icon)}</span><h1>${title}</h1><p class="sub" style="color:var(--mute);margin:0">${sub}</p>${body}${m}</div>`;
+  if(adm.st==='loading')return card('lock','Masuk admin','Memuat…','');
+  if(adm.st==='error')return card('lock','Masuk admin','Panel admin belum siap.','');
+  if(adm.st==='login')return card('lock','Masuk admin','Khusus pengelola direktori. Siapkan aplikasi Authenticator di ponsel Anda.',`
+    <form id="loginForm" autocomplete="on"><label>Email<input id="le" type="email" autocomplete="username" required autocapitalize="none" spellcheck="false"></label>
+    <label>Password<input id="lp" type="password" autocomplete="current-password" required></label>
     <label class="chk"><input id="lrem" type="checkbox">Ingat saya di perangkat ini</label>
-    <button class="btn" id="lbtn" type="submit">${ic('lock')}Masuk</button></form>
-    <div class="msg" id="lmsg" aria-live="polite"></div>
-    <p class="small">Token dibuat di GitHub → Settings → Developer settings → Fine-grained tokens, khusus repositori ini, dengan izin Contents dan Actions: Read and write. Tanpa "Ingat saya", Anda otomatis keluar saat browser ditutup.</p></div>`;
-  const man=state.rows.filter(r=>r.manual).sort((a,b)=>(b.ditambahkan||'').localeCompare(a.ditambahkan||'')).slice(0,6);
-  return `<div class="admhead fade"><div class="who"><span class="tile">${ic('user')}</span><div><h1>Panel admin</h1><p>Masuk sebagai <b>${esc(c.user||'admin')}</b> · ${esc(c.repo)}</p></div></div>
+    <button class="btn" id="lbtn" type="submit">${ic('lock')}Lanjut</button></form>
+    <p class="small"><a href="#" id="lupa">Lupa password?</a> · Tanpa "Ingat saya", sesi berakhir saat browser ditutup.</p>`);
+  if(adm.st==='mfa')return card('shield','Kode MFA','Buka aplikasi Authenticator di ponsel Anda dan masukkan kode 6 digit untuk <b>Direktori Regulasi</b>.',`
+    <form id="mfaForm"><label>Kode MFA<input id="lo" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="123456" required style="letter-spacing:.3em;font-variant-numeric:tabular-nums;font-size:22px;text-align:center"></label>
+    <button class="btn" id="lbtn" type="submit">${ic('check')}Masuk</button></form><p class="small"><a href="#" id="batal">Kembali</a></p>`);
+  if(adm.st==='enroll')return card('shield','Pasang MFA (sekali saja)','Akun admin wajib memakai aplikasi Authenticator. Langkah ini hanya dilakukan saat pertama kali masuk.',adm.secret?`
+    <ol class="small" style="font-size:14px;color:var(--ink2);padding-left:18px;margin-top:14px"><li>Buka <b>Google Authenticator</b> atau <b>Microsoft Authenticator</b> di ponsel.</li><li>Pindai kode QR di bawah (atau ketik kunci manual).</li><li>Masukkan kode 6 digit yang muncul.</li></ol>
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:8px">${adm.qr?`<img src="${adm.qr}" alt="Kode QR MFA" width="180" height="180" style="border-radius:12px;border:1px solid var(--line);background:#fff;padding:6px;image-rendering:pixelated">`:''}<div style="flex:1;min-width:180px"><span class="small" style="margin:0">Kunci manual</span><code style="display:block;font-size:14px;word-break:break-all;margin-top:4px">${esc(adm.secret.secretKey.match(/.{1,4}/g).join(' '))}</code></div></div>
+    <form id="enrollForm"><label>Kode dari aplikasi<input id="lo" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="123456" required style="letter-spacing:.3em;font-size:22px;text-align:center"></label>
+    <button class="btn" id="lbtn" type="submit">${ic('check')}Aktifkan MFA</button></form><p class="small"><a href="#" id="batal">Batal dan keluar</a></p>`:'');
+  const u=adm.user;
+  return `<div class="admhead fade"><div class="who"><span class="tile">${ic('user')}</span><div><h1>Panel admin</h1><p>Masuk sebagai <b>${esc(u?.email||'')}</b> · MFA aktif</p></div></div>
     <button class="btn" id="admAdd">${ic('plus')}Tambah peraturan</button><button class="btn ghost" id="admOut">${ic('logout')}Keluar</button></div>
   <div class="adm fade">
-    <div class="panel"><div class="ph">${ic('refresh')}Proses terakhir<a class="more" style="margin-left:auto" href="https://github.com/${esc(c.repo)}/actions" target="_blank" rel="noopener">GitHub Actions${ic('ext')}</a></div><ul class="runs" id="runs"><li style="padding:12px;color:var(--mute)">Memuat…</li></ul></div>
+    <div class="panel"><div class="ph">${ic('refresh')}Antrean permintaan</div><p class="small" style="margin:0 16px 6px">Diproses otomatis setiap ±5 menit; status di bawah ini diperbarui langsung.</p><ul class="runs" id="queue"><li style="padding:12px;color:var(--mute)">Memuat…</li></ul></div>
     <div style="display:grid;gap:16px;align-content:start">
-      <div class="panel"><div class="ph">${ic('upload')}Ditambahkan manual</div><ul class="feed">${man.map(r=>`<li><button data-open="${esc(r.id)}"><span class="mini k-${kOf(r)}">${ic(CAT[r.kategori]?.icon||'file')}</span><span><span class="ft">${esc(ref(r))}</span><span class="fs">${esc(r.judul)}</span></span><span class="fd">${esc(fmt(r.ditambahkan))}</span></button></li>`).join('')||'<li style="padding:12px 14px;color:var(--mute)">Belum ada.</li>'}</ul></div>
-      <div class="panel"><div class="ph">${ic('link')}Pintasan</div><div class="links">
-        <a href="https://github.com/${esc(c.repo)}/actions/workflows/update.yml" target="_blank" rel="noopener">${ic('refresh')}Jalankan pengecekan JDIH sekarang</a>
-        <a href="https://github.com/${esc(c.repo)}/blob/main/public/data/peraturan.json" target="_blank" rel="noopener">${ic('file')}Edit data peraturan</a>
-        <a href="/#beranda">${ic('home')}Lihat halaman publik</a></div></div>
+      <div class="panel"><div class="ph">${ic('upload')}Ditambahkan manual</div><ul class="feed">${state.rows.filter(r=>r.manual).sort((a,b)=>(b.ditambahkan||'').localeCompare(a.ditambahkan||'')).slice(0,6).map(r=>`<li><button data-open="${esc(r.id)}"><span class="mini k-${kOf(r)}">${ic(CAT[r.kategori]?.icon||'file')}</span><span><span class="ft">${esc(ref(r))}</span><span class="fs">${esc(r.judul)}</span></span><span class="fd">${esc(fmt(r.ditambahkan))}</span></button></li>`).join('')||'<li style="padding:12px 14px;color:var(--mute)">Belum ada.</li>'}</ul></div>
+      <div class="panel"><div class="ph">${ic('link')}Pintasan</div><div class="links"><a href="/#beranda">${ic('home')}Lihat halaman publik</a></div></div>
     </div></div>`;
 }
-const RUNNAME={'update.yml':'Pantau peraturan JDIH','tambah-manual.yml':'Tambah peraturan manual','deploy.yml':'Deploy'};
-async function loadRuns(){
-  const el=$('#runs');if(!el)return;
-  try{const j=await gh('/actions/runs?per_page=8');
-    el.innerHTML=(j.workflow_runs||[]).map(r=>{const st=r.status!=='completed'?'run':(r.conclusion||'');const w=(r.path||'').split('/').pop();
-      return `<li><a href="${esc(r.html_url)}" target="_blank" rel="noopener"><span class="rs ${esc(st)}"></span><span><b>${esc(RUNNAME[w]||r.name)}</b><span>${esc(st==='run'?'Sedang berjalan':st==='success'?'Berhasil':st==='failure'?'Gagal':st)} · ${esc(new Date(r.created_at).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}))}</span></span>${ic('ext')}</a></li>`}).join('')||'<li style="padding:12px;color:var(--mute)">Belum ada proses.</li>';
-  }catch(e){el.innerHTML=`<li style="padding:12px;color:var(--bad)">Gagal memuat: ${esc(e.message)}</li>`;if(/401/.test(e.message))logout()}
-}
-let runsTimer=null;
-function bindAdmin(){
-  showAdmin();clearInterval(runsTimer);
-  const f=$('#loginForm');
-  if(f){f.addEventListener('submit',async e=>{e.preventDefault();
-    const repo=$('#lrepo').value.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/$/,''),tok=$('#ltok').value.trim(),rem=$('#lrem').checked,m=$('#lmsg');
-    if(!/^[\w.-]+\/[\w.-]+$/.test(repo)||!tok){m.className='msg err';m.textContent='Isi repositori dan token.';return}
-    $('#lbtn').disabled=true;m.className='msg';m.textContent='Memeriksa akses…';
-    try{
-      const H2={Accept:'application/vnd.github+json',Authorization:'Bearer '+tok,'X-GitHub-Api-Version':'2022-11-28'};
-      const r=await fetch('https://api.github.com/repos/'+repo,{headers:H2});
-      if(!r.ok)throw new Error(r.status===401?'Token tidak valid atau kedaluwarsa':r.status===404?'Repositori tidak ditemukan atau token tidak diberi akses ke repositori ini':'GitHub '+r.status);
-      const j=await r.json();if(!j.permissions?.push)throw new Error('Token tidak punya izin tulis (Contents: Read and write)');
-      let user='';try{const u=await fetch('https://api.github.com/user',{headers:H2});if(u.ok)user=(await u.json()).login||''}catch(_){}
-      const S=rem?LS:SS;S.set('dp_repo',j.full_name);S.set('dp_tok',tok);S.set('dp_user',user);
-      toast('Berhasil masuk');render();
-    }catch(err){m.className='msg err';m.textContent=err.message}finally{const b=$('#lbtn');if(b)b.disabled=false}
-  });setTimeout(()=>$('#ltok')?.focus(),50);return}
-  $('#admAdd').onclick=openAdmin;$('#admOut').onclick=logout;
-  loadRuns();runsTimer=setInterval(loadRuns,30000);
+const busy=b=>{const x=$('#lbtn');if(x)x.disabled=b};
+const showErr=t=>{const m=$('#lmsg');if(m){m.className='msg err';m.textContent=t}};
+const digitsOnly=()=>{$('#lo')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6)})};
+async function bindAdmin(){
+  showAdmin();
+  if(!FB){if(!(await initFirebase()))return}
+  if(adm.st==='login'){
+    $('#loginForm').addEventListener('submit',async e=>{e.preventDefault();busy(true);adm.msg='';
+      try{await FB.setPersistence(auth,$('#lrem').checked?FB.browserLocalPersistence:FB.browserSessionPersistence);
+        await FB.signInWithEmailAndPassword(auth,$('#le').value.trim(),$('#lp').value)}
+      catch(err){if(err.code==='auth/multi-factor-auth-required'){const r=FB.getMultiFactorResolver(auth,err);setAdm({st:'mfa',resolver:r,msg:''})}else{showErr(errMsg(err));busy(false)}}
+    });
+    $('#lupa').onclick=async e=>{e.preventDefault();const em=$('#le').value.trim();if(!em){showErr('Isi email terlebih dahulu, lalu klik "Lupa password?".');return}
+      try{await FB.sendPasswordResetEmail(auth,em);const m=$('#lmsg');m.className='msg ok';m.textContent='Jika email terdaftar, tautan atur ulang password sudah dikirim.'}catch(err){showErr(errMsg(err))}};
+    setTimeout(()=>$('#le')?.focus(),50);
+  }else if(adm.st==='mfa'){
+    digitsOnly();setTimeout(()=>$('#lo')?.focus(),50);
+    $('#batal').onclick=e=>{e.preventDefault();setAdm({st:'login',resolver:null,msg:''})};
+    $('#mfaForm').addEventListener('submit',async e=>{e.preventDefault();busy(true);
+      try{const hint=adm.resolver.hints.find(h=>h.factorId===FB.TotpMultiFactorGenerator.FACTOR_ID)||adm.resolver.hints[0];
+        await adm.resolver.resolveSignIn(FB.TotpMultiFactorGenerator.assertionForSignIn(hint.uid,$('#lo').value.trim()));
+        adm.resolver=null;toast('Berhasil masuk')}
+      catch(err){showErr(errMsg(err));busy(false);$('#lo').value='';$('#lo').focus()}
+    });
+  }else if(adm.st==='enroll'&&adm.secret){
+    digitsOnly();setTimeout(()=>$('#lo')?.focus(),50);
+    $('#batal').onclick=async e=>{e.preventDefault();await FB.signOut(auth);setAdm({st:'login',secret:null,msg:''})};
+    $('#enrollForm').addEventListener('submit',async e=>{e.preventDefault();busy(true);
+      try{await FB.multiFactor(adm.user).enroll(FB.TotpMultiFactorGenerator.assertionForEnrollment(adm.secret,$('#lo').value.trim()),'Authenticator');
+        await FB.signOut(auth);setAdm({st:'login',secret:null,msg:'MFA aktif. Silakan masuk lagi dengan email, password, lalu kode dari aplikasi Authenticator.'})}
+      catch(err){showErr(errMsg(err));busy(false)}
+    });
+  }else if(adm.st==='panel'){
+    $('#admAdd').onclick=openAdmin;$('#admOut').onclick=async()=>{await FB.signOut(auth);setAdm({st:'login',msg:''});toast('Anda sudah keluar')};
+    renderQueue();
+  }
 }
 let mode='link';
 const msg=(t,k='')=>{const m=$('#msg');m.className='msg '+k;m.innerHTML=t};
-const gh=async(path,opt={})=>{const {repo,tok}=cfg();const r=await fetch(`https://api.github.com/repos/${repo}${path}`,{...opt,headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+tok,'X-GitHub-Api-Version':'2022-11-28',...(opt.body?{'Content-Type':'application/json'}:{})}});if(!r.ok){let d='';try{d=(await r.json()).message}catch(_){}throw new Error(`GitHub ${r.status}${d?': '+d:''}`)}return r.status===204?null:r.json()};
-const actionsLink=()=>`<a href="https://github.com/${esc(cfg().repo)}/actions/workflows/tambah-manual.yml" target="_blank" rel="noopener">lihat prosesnya di GitHub Actions</a>`;
+const actionsLink=()=>'pantau di kotak "Antrean permintaan"';
 const setMode=m=>{mode=m;$('#mLink').setAttribute('aria-pressed',m==='link');$('#mFile').setAttribute('aria-pressed',m==='file');$('#fLink').hidden=m!=='link';$('#fFile').hidden=m!=='file'};
 $('#mLink').onclick=()=>setMode('link');$('#mFile').onclick=()=>setMode('file');
 function openAdmin(){if(!IS_ADMIN||!loggedIn())return;msg('');$('#ov').hidden=false;setTimeout(()=>$('#links').focus(),30)}
-function closeAdmin(){$('#ov').hidden=true;$('#openAdd').focus()}
-$('#openAdd').onclick=openAdmin;$('#closeAdd').onclick=closeAdmin;
+function closeAdmin(){$('#ov').hidden=true;$('#admAdd')?.focus()}
+$('#closeAdd').onclick=closeAdmin;
 $('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeAdmin()});
 ['fLink','fFile'].forEach(id=>$('#'+id).addEventListener('submit',e=>e.preventDefault()));
 const updDrop=()=>{const f=[...$('#pdfs').files];$('#dropTxt').textContent=f.length?f.map(x=>x.name).join(', '):'Seret PDF ke sini atau klik untuk memilih'};
@@ -769,35 +821,34 @@ const b64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(Stri
 const b64txt=s=>btoa(unescape(encodeURIComponent(s)));
 const safe=n=>n.normalize('NFKD').replace(/[^\w.-]+/g,'-').replace(/-+/g,'-').slice(-80);
 let watchTimer=null;
-const watch=before=>{clearInterval(watchTimer);let n=0;watchTimer=setInterval(async()=>{n++;await load();const baru=state.rows.filter(r=>!before.has(r.id+'|'+(r.ringkasan||'')));if(baru.length){clearInterval(watchTimer);msg('Sudah masuk ke direktori: '+baru.map(r=>`<b>${esc(ref(r))}</b>`).join(', ')+'.','ok');toast('Peraturan baru sudah masuk')}else if(n>=20){clearInterval(watchTimer);msg('Belum terlihat setelah 10 menit. Periksa '+actionsLink()+'.','err')}},30000)};
+const watch=before=>{clearInterval(watchTimer);let n=0;watchTimer=setInterval(async()=>{n++;await load();const baru=state.rows.filter(r=>!before.has(r.id+'|'+(r.ringkasan||'')));if(baru.length){clearInterval(watchTimer);msg('Sudah masuk ke direktori: '+baru.map(r=>`<b>${esc(ref(r))}</b>`).join(', ')+'.','ok');toast('Peraturan baru sudah masuk')}else if(n>=40){clearInterval(watchTimer);msg('Belum terlihat setelah 20 menit. Periksa kotak "Antrean permintaan".','err')}},30000)};
 $('#send').onclick=async()=>{
   if(!IS_ADMIN||!loggedIn()){msg('Sesi admin berakhir. Silakan masuk lagi.','err');return}
-  const note=$('#note').value.trim(),btn=$('#send');
+  const note=$('#note').value.trim(),btn=$('#send'),email=adm.user.email;
   const before=new Set(state.rows.map(r=>r.id+'|'+(r.ringkasan||'')));
   btn.disabled=true;
   try{
     if(mode==='link'){
-      const urls=$('#links').value.split(/\s+/).filter(u=>/^https?:\/\//.test(u));
+      const urls=$('#links').value.split(/\s+/).filter(u=>/^https?:\/\/\S+$/.test(u)).slice(0,10);
       if(!urls.length)throw new Error('Masukkan minimal satu link yang diawali https://');
       msg('Mengirim…');
-      await gh('/actions/workflows/tambah-manual.yml/dispatches',{method:'POST',body:JSON.stringify({ref:'main',inputs:{url:urls.join(' '),catatan:note}})});
+      await FB.addDoc(FB.collection(db,'antrean'),{jenis:'link',urls:urls.join(' '),catatan:note,status:'menunggu',oleh:email,dibuat:FB.serverTimestamp()});
       $('#links').value='';
     }else{
       const files=[...$('#pdfs').files];
       if(!files.length)throw new Error('Pilih minimal satu file PDF');
       const big=files.find(f=>f.size>50*1024*1024);if(big)throw new Error(`${big.name} lebih dari 50 MB`);
-      const src=$('#src').value.trim(),stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
+      const src=$('#src').value.trim(),CH=900000;
       for(const [i,f] of files.entries()){
-        const name=`inbox/${stamp}-${i+1}-${safe(f.name.replace(/\.pdf$/i,''))}.pdf`;
-        msg(`Mengunggah ${i+1}/${files.length}: ${esc(f.name)}…`);
-        if(src||note)await gh('/contents/'+encodeURI(name)+'.txt',{method:'PUT',body:JSON.stringify({message:'Catatan untuk '+f.name,content:b64txt([src,note].filter(Boolean).join('\n'))})});
-        await gh('/contents/'+encodeURI(name),{method:'PUT',body:JSON.stringify({message:'Unggah peraturan: '+f.name,content:await b64(f)})});
+        const data=await b64(f),n=Math.ceil(data.length/CH),ref=FB.doc(FB.collection(db,'antrean'));
+        for(let k=0;k<n;k++){msg(`Mengunggah ${esc(f.name)} (${i+1}/${files.length}) — ${Math.round((k+1)/n*100)}%`);await FB.setDoc(FB.doc(db,'antrean',ref.id,'bagian',String(k).padStart(4,'0')),{data:data.slice(k*CH,(k+1)*CH)})}
+        await FB.setDoc(ref,{jenis:'pdf',nama:f.name,ukuran:f.size,parts:n,sumber:src,catatan:note,status:'menunggu',oleh:email,dibuat:FB.serverTimestamp()});
       }
       $('#pdfs').value='';updDrop();
     }
-    msg('Terkirim. Gemini sedang membaca dan merangkum; biasanya 2–5 menit. Halaman ini memeriksa otomatis setiap 30 detik, atau '+actionsLink()+'.','ok');
-    watch(before);setTimeout(loadRuns,4000);
-  }catch(e){msg('Gagal: '+esc(e.message),'err')}
+    msg('Terkirim ke antrean. Akan diproses otomatis dalam ±5–15 menit; status terlihat di kotak "Antrean permintaan".','ok');
+    watch(before);
+  }catch(e){msg('Gagal: '+esc(e.code==='permission-denied'?'Akses ditolak. Keluar lalu masuk lagi dengan kode MFA.':e.message),'err')}
   finally{btn.disabled=false}
 };
 
