@@ -335,6 +335,52 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
   .toolbar .sel{flex:1}
 }
 .topsearch{display:none}
+/* ---------- menu aksesibilitas ---------- */
+.a11y-fab{position:fixed;left:20px;bottom:20px;z-index:45;width:56px;height:56px;border-radius:50%;border:3px solid #fff;background:#1d39c4;color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 24px rgba(29,57,196,.45);transition:transform .15s}
+.a11y-fab:hover{transform:scale(1.06)}.a11y-fab svg{width:30px;height:30px;stroke-width:2}
+.a11y-fab .dotx{position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+.a11y{position:fixed;left:0;top:0;bottom:0;width:min(420px,100%);z-index:46;background:var(--bg);box-shadow:var(--shadow2);display:flex;flex-direction:column;transform:translateX(-105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.a11y.on{transform:none}
+.a11y-h{display:flex;align-items:center;gap:10px;padding:16px 18px;background:#1d39c4;color:#fff}
+.a11y-h h2{margin:0;font-size:18px;flex:1}
+.a11y-h button{width:40px;height:40px;border-radius:50%;border:0;background:#fff;color:#1d39c4;display:grid;place-items:center;cursor:pointer}
+.a11y-b{overflow-y:auto;padding:16px 16px 28px;flex:1}
+.a11y-sec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.a11y-sec h3{margin:2px 2px 12px;font-size:12.5px;font-weight:800;color:var(--ink2);letter-spacing:.04em}
+.a11y-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.a11y-t{position:relative;display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid var(--line);background:var(--surface2);border-radius:14px;padding:12px;cursor:pointer;min-height:96px;color:var(--ink)}
+.a11y-t .ti{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--brandSoft);color:var(--brand)}
+.a11y-t b{font-size:13.5px;line-height:1.25}.a11y-t small{font-size:12px;color:var(--mute);line-height:1.35}
+.a11y-t .sw{position:absolute;top:12px;right:12px;width:34px;height:20px;border-radius:99px;background:var(--line);transition:background .15s}
+.a11y-t .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s}
+.a11y-t[aria-pressed=true]{border-color:var(--brand);background:var(--brandSoft)}
+.a11y-t[aria-pressed=true] .sw{background:var(--brand)}.a11y-t[aria-pressed=true] .sw::after{transform:translateX(14px)}
+.a11y-step{display:flex;align-items:center;gap:10px;padding:8px 4px}
+.a11y-step span{flex:1;font-weight:600;font-size:14px}
+.a11y-step button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);font-size:20px;font-weight:700;cursor:pointer;color:var(--ink)}
+.a11y-step output{min-width:52px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.a11y-reset{width:100%;margin-top:4px}
+.a11y-guide{position:fixed;left:0;right:0;height:12px;background:rgba(255,212,59,.55);border-top:2px solid #b7791f;border-bottom:2px solid #b7791f;pointer-events:none;z-index:44;display:none}
+.a11y-mask{position:fixed;inset:0;pointer-events:none;z-index:44;display:none;background:linear-gradient(rgba(0,0,0,.55) var(--mt,0),transparent var(--mt,0),transparent var(--mb,0),rgba(0,0,0,.55) var(--mb,0))}
+html.a-guide .a11y-guide,html.a-mask .a11y-mask{display:block}
+html.a-fs .app,html.a-fs .drawer,html.a-fs .ov,html.a-fs .pal{zoom:var(--a-zoom,1)}
+html.a-lh body *:not(svg):not(svg *){line-height:1.9!important}
+html.a-ls body *:not(svg):not(svg *){letter-spacing:.06em!important;word-spacing:.14em!important}
+html.a-font body,html.a-font body *:not(svg):not(svg *):not(kbd){font-family:"Atkinson Hyperlegible",Verdana,sans-serif!important}
+html.a-links a,html.a-links button.card,html.a-links .feed button,html.a-links [data-open]{outline:2px solid #e8a33d!important;outline-offset:2px;text-decoration:underline!important}
+html.a-head h1,html.a-head h2,html.a-head h3{outline:2px dashed var(--brand);outline-offset:4px;border-radius:4px}
+html.a-left body *:not(.a11y-fab){text-align:left!important}
+html.a-focus :focus-visible{outline:4px solid #e8a33d!important;outline-offset:3px!important;box-shadow:0 0 0 7px rgba(232,163,61,.3)!important}
+html.a-cursor,html.a-cursor *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l16 9-7 2-3 7z' fill='black' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E") 4 2,auto!important}
+html.a-noimg img:not(.keepimg){visibility:hidden}
+html.a-still *,html.a-still *::before,html.a-still *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+html.a-contrast{filter:contrast(1.35)}
+html.a-gray{filter:grayscale(1)}
+html.a-lowsat{filter:saturate(.45)}
+html.a-contrast.a-gray{filter:contrast(1.35) grayscale(1)}
+html.a-contrast.a-lowsat{filter:contrast(1.35) saturate(.45)}
+html.a-speak body [data-speakable]:hover,html.a-speak .content p:hover,html.a-speak .content h1:hover,html.a-speak .content h2:hover,html.a-speak .content h3:hover,html.a-speak .dsec p:hover,html.a-speak .points li:hover{background:rgba(255,212,59,.35);cursor:pointer}
+@media (max-width:900px){.a11y-fab{bottom:84px;left:14px;width:50px;height:50px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -373,6 +419,15 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
     <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4"/><path d="M10 17l-5-5 5-5M5 12h11"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-a11y" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5c2.2.7 4.5 1 7 1s4.8-.3 7-1"/><path d="M12 9.5v5"/><path d="m8.5 21 3.5-6.5 3.5 6.5"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/><path d="M3 3l18 18"/></symbol>
+    <symbol id="i-focus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 5a2 2 0 0 1 2-2h5a3 3 0 0 1 3 3v15a2 2 0 0 0-2-2H2z"/><path d="M22 5a2 2 0 0 0-2-2h-5a3 3 0 0 0-3 3v15a2 2 0 0 1 2-2h8z"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+    <symbol id="i-type" viewBox="0 0 24 24"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></symbol>
+    <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/></symbol>
     <symbol id="i-mark" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4"/><path d="M10 12h6M10 16h4"/><path d="M4 7v14h11"/></symbol>
   </defs>
 </svg>
@@ -440,6 +495,13 @@ mark{background:color-mix(in srgb,#ffd43b 55%,transparent);color:inherit;border-
   </div>
 </div>
 
+<button class="a11y-fab" id="a11yBtn" aria-label="Menu aksesibilitas (Alt+A)" aria-controls="a11y" aria-expanded="false"><svg class="i"><use href="#i-a11y"/></svg><span class="dotx" id="a11yDot" hidden></span></button>
+<aside class="a11y" id="a11y" role="dialog" aria-modal="false" aria-labelledby="a11yTitle" aria-hidden="true">
+  <div class="a11y-h"><svg class="i" style="width:24px;height:24px"><use href="#i-a11y"/></svg><h2 id="a11yTitle">Menu Aksesibilitas</h2>
+    <button id="a11yReset" aria-label="Atur ulang semua"><svg class="i"><use href="#i-refresh"/></svg></button><button id="a11yClose" aria-label="Tutup"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <div class="a11y-b" id="a11yBody"></div>
+</aside>
+<div class="a11y-guide" id="a11yGuide" aria-hidden="true"></div><div class="a11y-mask" id="a11yMask" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status"><svg class="i"><use href="#i-check"/></svg><span></span></div>
 
 <script>
@@ -458,7 +520,7 @@ $('#theme').onclick=()=>{const n=document.documentElement.dataset.theme==='dark'
 const CAT={Penganggaran:{k:'ang',v:'penganggaran',name:'Penganggaran',icon:'wallet',desc:'Perencanaan, pelaksanaan, standar biaya, dan pelaporan APBN'},
            Pengadaan:{k:'pbj',v:'pengadaan',name:'Pengadaan Barang/Jasa',icon:'cart',desc:'Perpres PBJ, peraturan dan edaran LKPP, katalog elektronik'},
            BMN:{k:'bmn',v:'bmn',name:'Barang Milik Negara',icon:'building',desc:'Perencanaan hingga penghapusan, pemanfaatan, dan penatausahaan BMN'}};
-const RANK={'UU':1,'PP':2,'Perpres':3,'Inpres':4,'PMK':5,'Peraturan LKPP':6,'SE LKPP':7,'Keputusan LKPP':8};
+const RANK={'UU':1,'PP':2,'Perpres':3,'Inpres':4,'PMK':5,'KMK':6,'Peraturan LKPP':7,'SE LKPP':8,'Keputusan LKPP':9};
 const MONTHS=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 const PINS=['uu-17-2003','uu-1-2004','pmk-62-2023','perpres-16-2018','pp-27-2014'];
 const state={rows:[],meta:null,loaded:false,view:'beranda',q:'',jenis:'',status:'Berlaku',sort:'baru',layout:LS.get('dp_layout')||'cards',limit:24,open:null};
@@ -467,7 +529,7 @@ const dateKey=r=>r.tanggal||(r.tahun?String(r.tahun)+'-01-01':'');
 const days=d=>d?(Date.now()-new Date(d))/864e5:1e9;
 const isNew=r=>days(r.tanggal)<=120;
 const recentAdd=r=>(r.otomatis||r.manual)&&days(r.ditambahkan)<=45;
-const ref=r=>/\//.test(r.nomor||'')?(/PMK/.test(r.nomor)?'PMK ':r.jenis+' ')+r.nomor:`${r.jenis} ${r.nomor} Tahun ${r.tahun}`;
+const ref=r=>{const n=r.nomor||'',j=(n.match(/\/(PMK|KMK)\./i)||[])[1];return /\//.test(n)?`${(j||r.jenis||'').toUpperCase()==='PMK'||(j||r.jenis||'').toUpperCase()==='KMK'?(j||r.jenis).toUpperCase():r.jenis} ${n}`:`${r.jenis} ${n} Tahun ${r.tahun}`};
 const kOf=r=>(CAT[r.kategori]||CAT.Penganggaran).k;
 const berlaku=r=>r.status!=='Dicabut';
 const badges=r=>(r.otomatis?`<span class="bd auto">${ic('spark')}Otomatis</span>`:'')+(r.manual?`<span class="bd man">${ic('upload')}Manual</span>`:'')+(isNew(r)&&berlaku(r)?`<span class="bd new">Baru</span>`:'');
@@ -852,6 +914,76 @@ $('#send').onclick=async()=>{
   }catch(e){msg('Gagal: '+esc(e.code==='permission-denied'?'Akses ditolak. Keluar lalu masuk lagi dengan kode MFA.':e.message),'err')}
   finally{btn.disabled=false}
 };
+
+/* ---------- menu aksesibilitas ---------- */
+{
+const ROOT=document.documentElement;
+const OPT={
+  fs:['Ukuran teks','type'],lh:['Jarak antarbaris','list','Memberi ruang di antara baris'],ls:['Jarak huruf','type','Merenggangkan huruf dan kata'],
+  font:['Huruf mudah dibaca','book','Font khusus untuk disleksia & low vision'],links:['Sorot tautan','link','Menandai semua yang bisa diklik'],
+  head:['Sorot judul','file','Menandai judul halaman dan bagian'],left:['Rata kiri','list','Semua teks rata kiri'],
+  contrast:['Kontras tinggi','contrast','Mempertegas warna dan teks'],gray:['Hitam putih','contrast','Menghilangkan warna'],lowsat:['Saturasi rendah','contrast','Warna lebih lembut'],
+  still:['Hentikan animasi','bolt','Mematikan semua gerakan'],noimg:['Sembunyikan gambar','eye','Menyembunyikan gambar dekoratif'],
+  cursor:['Kursor besar','focus','Penunjuk mouse lebih besar'],guide:['Panduan baca','list','Garis bantu mengikuti mouse'],
+  mask:['Masker baca','focus','Menggelapkan selain baris yang dibaca'],focus:['Sorot fokus keyboard','keyboard','Penanda tebal saat menekan Tab'],
+  speak:['Bacakan teks','volume','Klik teks untuk dibacakan']};
+const PROF={
+  seizure:['Ramah kejang','bolt','Menghentikan animasi dan meredam warna',['still','lowsat']],
+  vision:['Gangguan penglihatan','eye','Teks lebih besar, kontras, dan kursor besar',['contrast','links','cursor'],{fs:130}],
+  blind:['Tunanetra','volume','Bacakan teks dan navigasi keyboard',['speak','focus','links']],
+  adhd:['Ramah ADHD','focus','Masker baca dan tanpa animasi',['mask','still']],
+  cognitive:['Kognitif & disleksia','book','Huruf mudah dibaca dan jarak lega',['font','lh','ls','head']],
+  motor:['Navigasi keyboard','keyboard','Penanda fokus tebal untuk tombol Tab',['focus','links']]};
+const SECT=[['PENYESUAIAN KONTEN',['lh','ls','font','links','head','left']],['WARNA & KONTRAS',['contrast','gray','lowsat']],['ORIENTASI & BANTUAN',['still','noimg','cursor','guide','mask','focus','speak']]];
+let S={};try{S=JSON.parse(localStorage.getItem('dp_a11y')||'{}')}catch(_){}
+const save=()=>{try{localStorage.setItem('dp_a11y',JSON.stringify(S))}catch(_){}};
+let fontLoaded=false;
+function apply(){
+  for(const k of Object.keys(OPT))if(k!=='fs')ROOT.classList.toggle('a-'+k,!!S[k]);
+  const fs=S.fs||100;ROOT.classList.toggle('a-fs',fs!==100);ROOT.style.setProperty('--a-zoom',fs/100);
+  if(S.font&&!fontLoaded){fontLoaded=true;const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap';document.head.appendChild(l)}
+  if(!S.speak&&window.speechSynthesis)speechSynthesis.cancel();
+  $('#a11yDot').hidden=!Object.entries(S).some(([k,v])=>k==='fs'?v!==100:v);
+}
+const tile=(k,[label,icon,desc],pressed,attr)=>`<button class="a11y-t" ${attr}="${k}" aria-pressed="${pressed}"><span class="ti">${ic(icon)}</span><span class="sw" aria-hidden="true"></span><b>${label}</b>${desc?`<small>${desc}</small>`:''}</button>`;
+const profOn=k=>{const p=PROF[k];return p[3].every(o=>S[o])&&(!p[4]||Object.entries(p[4]).every(([a,b])=>S[a]===b))};
+function draw(){
+  $('#a11yBody').innerHTML=`<div class="a11y-sec"><h3>PROFIL AKSESIBILITAS</h3><div class="a11y-g">${Object.entries(PROF).map(([k,p])=>tile(k,p,profOn(k),'data-prof')).join('')}</div></div>
+  <div class="a11y-sec"><h3>UKURAN TEKS</h3><div class="a11y-step"><span>${ic('type')} Perbesar / perkecil</span><button data-fs="-10" aria-label="Perkecil teks">−</button><output aria-live="polite">${S.fs||100}%</output><button data-fs="10" aria-label="Perbesar teks">+</button></div></div>
+  ${SECT.map(([t,ks])=>`<div class="a11y-sec"><h3>${t}</h3><div class="a11y-g">${ks.map(k=>tile(k,OPT[k],!!S[k],'data-opt')).join('')}</div></div>`).join('')}
+  <button class="btn ghost a11y-reset" id="a11yReset2">${ic('refresh')}Atur ulang semua</button>
+  <p class="small" style="text-align:center">Pilihan tersimpan di perangkat ini. Pintasan: <kbd>Alt</kbd> + <kbd>A</kbd></p>`;
+}
+const EXCL=[['contrast','gray','lowsat'].filter(x=>x!=='contrast'),['guide','mask']];
+function toggle(k){S[k]=!S[k];if(S[k])EXCL.forEach(g=>{if(g.includes(k))g.forEach(o=>{if(o!==k)S[o]=false})});
+  if(k==='speak'&&S.speak&&!window.speechSynthesis){S.speak=false;toast('Browser ini tidak mendukung fitur bacakan teks')}}
+$('#a11yBody').addEventListener('click',e=>{
+  const o=e.target.closest('[data-opt]'),p=e.target.closest('[data-prof]'),f=e.target.closest('[data-fs]');
+  if(o)toggle(o.dataset.opt);
+  else if(p){const pr=PROF[p.dataset.prof],on=profOn(p.dataset.prof);pr[3].forEach(x=>{S[x]=!on});if(pr[4])Object.entries(pr[4]).forEach(([a,b])=>{S[a]=on?100:b});if(!on)EXCL.forEach(g=>{const act=g.filter(x=>S[x]);if(act.length>1)act.slice(1).forEach(x=>S[x]=false)})}
+  else if(f)S.fs=Math.max(80,Math.min(160,(S.fs||100)+ +f.dataset.fs));
+  else if(e.target.closest('#a11yReset2')){S={}}
+  else return;
+  save();apply();draw();
+});
+const open=()=>{draw();const a=$('#a11y');a.classList.add('on');a.setAttribute('aria-hidden','false');$('#a11yBtn').setAttribute('aria-expanded','true');setTimeout(()=>$('#a11yClose').focus(),60)};
+const close=()=>{const a=$('#a11y');a.classList.remove('on');a.setAttribute('aria-hidden','true');$('#a11yBtn').setAttribute('aria-expanded','false');$('#a11yBtn').focus()};
+$('#a11yBtn').onclick=()=>$('#a11y').classList.contains('on')?close():open();
+$('#a11yClose').onclick=close;
+$('#a11yReset').onclick=()=>{S={};save();apply();draw();toast('Pengaturan aksesibilitas diatur ulang')};
+document.addEventListener('keydown',e=>{if(e.altKey&&e.key.toLowerCase()==='a'){e.preventDefault();$('#a11y').classList.contains('on')?close():open()}else if(e.key==='Escape'&&$('#a11y').classList.contains('on'))close()});
+// panduan & masker baca
+document.addEventListener('mousemove',e=>{if(S.guide)$('#a11yGuide').style.top=(e.clientY-6)+'px';if(S.mask){ROOT.style.setProperty('--mt',(e.clientY-40)+'px');ROOT.style.setProperty('--mb',(e.clientY+40)+'px')}},{passive:true});
+// bacakan teks (Web Speech API, suara Bahasa Indonesia bila tersedia)
+document.addEventListener('click',e=>{
+  if(!S.speak||!window.speechSynthesis||e.target.closest('#a11y,#a11yBtn'))return;
+  const el=e.target.closest('p,h1,h2,h3,li,td,button,a,label,.card,.cat');if(!el)return;
+  const t=(el.getAttribute('aria-label')||el.innerText||'').trim().slice(0,1200);if(!t)return;
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';
+  const v=speechSynthesis.getVoices().find(v=>/^id/i.test(v.lang));if(v)u.voice=v;u.rate=.95;speechSynthesis.speak(u);
+},true);
+apply();
+}
 
 /* ---------- mulai ---------- */
 route(true);load();
