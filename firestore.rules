@@ -1,0 +1,28 @@
+rules_version = '2';
+// Hanya admin yang (1) diberi tanda admin oleh workflow "Setup admin" dan (2) masuk dengan MFA Authenticator
+// yang boleh membaca dan menulis antrean. Pengunjung publik tidak punya akses sama sekali.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.admin == true
+        && request.auth.token.firebase.sign_in_second_factor == 'totp';
+    }
+    match /antrean/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.status == 'menunggu'
+        && request.resource.data.oleh == request.auth.token.email
+        && request.resource.data.jenis in ['link', 'pdf'];
+      allow update, delete: if false;
+      match /bagian/{n} {
+        allow read: if isAdmin();
+        allow create: if isAdmin() && request.resource.data.data is string && request.resource.data.data.size() <= 1000000;
+        allow update, delete: if false;
+      }
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
