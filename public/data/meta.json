@@ -1,7 +1,21 @@
 {
-  "terakhir": "2026-11-23T11:05",
-  "catatan": "Tidak ada peraturan baru yang relevan",
+  "terakhir": "2026-11-24T14:20",
+  "catatan": "7 peraturan baru ditambahkan. JDIH Kemenkeu tidak dapat dijangkau",
   "riwayat": [
+    {
+      "waktu": "2026-11-24T14:20",
+      "baru": 7,
+      "catatan": "7 peraturan baru ditambahkan. JDIH Kemenkeu tidak dapat dijangkau",
+      "ditambahkan": [
+        "perpres-17-2023",
+        "perpres-93-2022",
+        "kep-lkpp-121-2026",
+        "kep-lkpp-117-2026",
+        "kep-lkpp-116-2026",
+        "kep-lkpp-115-2026",
+        "peraturan-kepala-lkpp-2-2018"
+      ]
+    },
     {
       "waktu": "2026-11-23T11:05",
       "baru": 0,
