@@ -1,7 +1,15 @@
 {
-  "terakhir": "2026-11-24T14:20",
-  "catatan": "7 peraturan baru ditambahkan. JDIH Kemenkeu tidak dapat dijangkau",
+  "terakhir": "2026-11-25T12:46",
+  "catatan": "1 peraturan baru ditambahkan",
   "riwayat": [
+    {
+      "waktu": "2026-11-25T12:46",
+      "baru": 1,
+      "catatan": "1 peraturan baru ditambahkan",
+      "ditambahkan": [
+        "lkpp-5-2025"
+      ]
+    },
     {
       "waktu": "2026-11-24T14:20",
       "baru": 7,
