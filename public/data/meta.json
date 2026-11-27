@@ -1,7 +1,20 @@
 {
-  "terakhir": "2026-11-26T12:29",
-  "catatan": "2 peraturan baru ditambahkan",
+  "terakhir": "2026-11-27T12:26",
+  "catatan": "6 peraturan baru ditambahkan",
   "riwayat": [
+    {
+      "waktu": "2026-11-27T12:26",
+      "baru": 6,
+      "catatan": "6 peraturan baru ditambahkan",
+      "ditambahkan": [
+        "kep-lkpp-128-2026",
+        "kep-lkpp-126-2026",
+        "se-lkpp-3-2026",
+        "se-lkpp-2-2026",
+        "se-lkpp-1-2026",
+        "se-lkpp-4-2025"
+      ]
+    },
     {
       "waktu": "2026-11-26T12:29",
       "baru": 2,
